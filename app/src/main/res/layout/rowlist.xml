@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--  horizontal:横並び  -->
+
+    <ImageView
+        android:id="@+id/thumbnailImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="10sp"
+        android:orientation="vertical">
+        <!--   vertical:縦並び     -->
+
+        <TextView
+            android:id="@+id/thumbTitleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="タイトル＝モデル名＋NUM"
+            android:paddingTop="6sp"
+            android:textSize="20sp"
+            android:gravity="right"/>
+
+
+        <TextView
+            android:id="@+id/thumbDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="アップデート日時"
+            android:paddingTop="10sp"
+            android:textSize="15sp"
+            android:gravity="right"/>
+
+        <TextView
+            android:id="@+id/thumbModelNumText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="写真数"
+            android:paddingTop="2sp"
+            android:textSize="15sp"
+            android:gravity="right"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>

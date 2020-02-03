@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">PortraitJava1</string>
+    <string name="kick_button">リストの更新</string>
+    <string name="hello_world">Hello_World・・・が必要か？</string>
+    <string name="menu_reset">設定の初期化</string>
+    <string name="menu_fonttype_serif">menu_fonttype_serif</string>
+    <string name="meun_fonttype_sunsserif">meun_fonttype_sunsserif</string>
+    <string name="menu_fontttype_monospace">menu_fontttype_monospace</string>
+    <string name="menu_fontstyle">menu_fontstyle</string>
+    <string name="menu_fontstyle_normal">menu_fontstyle_normal</string>
+    <string name="menu_fontstyle_italic">menu_fontstyle_italic</string>
+    <string name="menu_fontstyle_bold">menu_fontstyle_bold</string>
+    <string name="menu_fontstyle_bolditalic">menu_fontstyle_bolditalic</string>
+    <string name="menu_fonttype">menu_fonttype</string>
+</resources>
