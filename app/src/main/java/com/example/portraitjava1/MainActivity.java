@@ -1,8 +1,10 @@
 package com.example.portraitjava1;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -19,6 +21,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -36,6 +39,8 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
+import static android.icu.text.DateTimePatternGenerator.PatternInfo.OK;
+
 //import com.google.android.gms.ads.AdView;
 //import com.google.android.gms.ads.AdRequest;
 
@@ -43,10 +48,10 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     static final String thumnailURL = "http://portrait531.herokuapp.com/api/thumbnail";
-    static final String photoURL = "http://portrait531.herokuapp.com/api/data";
     static DBAdapter dbAdapter;
     static NoteListAdapter listAdapter;
     static List<Note> noteList = new ArrayList<Note>();
+    static SharedPreferences pref;
 
     TextView thumbTitleText,thumbModelNumText,thumbDateText;
     ImageView thumbnailImage;
@@ -59,21 +64,27 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //ntent.ACTION_SENDの受け取り http://techbooster.jpn.org/andriod/application/1388/
-        //HTTPアクセスの開始
-        task = new DownloadTask(this);
-        task.setListener(createListener());
-        task.execute(thumnailURL);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        //初めてこのアプリを読み込んだ場合
+        if (pref.getInt("START",0) == 0){
+            //このアプリについて、を表示→OK押したらHTTPアクセスの開始
+            firstCall(1);
+        } else {
+            //HTTPアクセスの開始
+            taskAccess();
+        }
+
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        //BitMapImageの初期化・・・これ要るんだっけ？
         GlobalVariable.initPhotoBM();
 
-        //部品の配置
-        setContentView(R.layout.activity_main);
         //画面パーツの配置
         findViews();
         //listerを設定
@@ -84,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     protected void findViews() {
+
+        setContentView(R.layout.activity_main);
+
         kickButton = (Button) findViewById(R.id.kickButton);
         dbAdapter = new DBAdapter(this);
         listAdapter = new NoteListAdapter();
@@ -124,8 +138,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             public void onItemClick(AdapterView parent, View view, int position, long id) {
                 Note note = noteList.get(position);
                 //次画面(webView)を呼び出し
-                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
-//                Intent intent = new Intent(MainActivity.this, Main3Activity.class);
+//                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+                Intent intent = new Intent(MainActivity.this, Main3Activity.class);
                 intent.putExtra("modelId", note.getModelId());
                 intent.putExtra("modelIdNum", note.getModelIdNum());
                 intent.putExtra("modelInsertNum", note.getModelInsertNum());
@@ -141,9 +155,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         switch (v.getId()) {
             case R.id.kickButton:
                 //HTTPアクセスの開始
-                task = new DownloadTask(this);
-                task.setListener(createListener());
-                task.execute(thumnailURL);
+                taskAccess();
                 break;
         }
     }
@@ -199,38 +211,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     // メニューアイテム選択イベント
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            //case R.id.action_settings:
-//            case R.id.menu_item01:
-//                // メニュー１選択時の処理
-//                Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-//                startActivity(intent);
-//                break;
-//            case R.id.menu_item02:
-//                new AlertDialog.Builder(MainActivity.this).setIcon(R.drawable.icon).setTitle("登録してある情報を全て削除します。よろしいですか。")
-//                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dbAdapter.open();
-//                                dbAdapter.deleteAllNotes();
-//                                dbAdapter.close();
-//                                File dAllfile[] = new File(MainActivity.this.getFilesDir().getAbsolutePath()).listFiles();
-//                                if (dAllfile != null) {
-//                                    for (int i = 0; i < dAllfile.length; i++) {
-//                                        if (dAllfile[i].isFile() && dAllfile[i].getName().endsWith("txt")) {
-//                                            dAllfile[i].delete();
-//                                        }
-//                                    }
-//                                }
-//                                loadNote();
-//                            }
-//                        }).setNegativeButton("Cancel", null).show();
-//                break;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // メニュー１選択時の処理
+            case R.id.menuFirst:
+                firstCall(0);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 
     //データ取得後の処理
@@ -283,5 +273,51 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         };
     }
 
+    protected void firstCall(int mode){
+
+        final String stringFirstCall =
+                "＜このアプリの権利関係について＞" + "\n" +
+                "このアプリに掲載されている写真には肖像権／著作権が存在します。" + "\n" +
+                "無断複製・無断転載等は禁止していますので、このアプリを通じた閲覧以外はご遠慮ください。" + "\n"  + "\n" +
+                "＜このアプリの使用方法について＞" + "\n" +
+                "リストをclickすると写真が表示されます。" + "\n" +
+                "次の写真を閲覧するときは写真の右側をダブルタップしてください。" + "\n" +
+                "（スワイプは認識してくれません。）"  + "\n" +
+                "OKを押すと処理を進めます。"  + "\n" +
+                "NGを押すと処理を停止します。";
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        alertDialog.setTitle("初めにお読みください。");
+        alertDialog.setMessage(stringFirstCall);
+        if(mode == 1){
+            //oncreateから呼び出しの場合はOK押したら操作を入れる。
+            alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    //初回FLGを折る
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putInt("START",1);
+                    editor.apply();
+                    //HTTPアクセスの開始
+                    taskAccess();
+                }
+            });
+            alertDialog.setNegativeButton("NG", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    onDestroy();
+                }
+            });
+
+        }else{
+            //設定から呼び出したときはOKのみ。
+            alertDialog.setPositiveButton("OK",null);
+        }
+        alertDialog.show();
+    }
+
+    protected void taskAccess(){
+        task = new DownloadTask(MainActivity.this);
+        task.setListener(createListener());
+        task.execute(thumnailURL);
+    }
 
 }

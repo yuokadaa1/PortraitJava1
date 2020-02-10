@@ -31,10 +31,11 @@ public class ExampleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, null);
-        ImageView imageView = view.findViewById(R.id.photoImage2);
-        imageView.setImageBitmap(GlobalVariable.getPhotoBM(getArguments().getInt("FragPosition")));
+//        ImageView imageView = view.findViewById(R.id.photoImage2);
+//        imageView.setImageBitmap(GlobalVariable.getPhotoBM(getArguments().getInt("FragPosition")));
 
         //こいつは最初からfragment的な処理をしてくれるな・・・
+        https://qiita.com/Cyber_Hacnosuke/items/b2a8724218d2f4a4c3c2
 //        ImageFreeShowerView mImageFreeShowerViewMain = view.findViewById(R.id.photoImage2);
 //        mImageFreeShowerViewMain.setBitmapList(GlobalVariable.getPhotoBM(getArguments().getInt("FragPosition")));
 

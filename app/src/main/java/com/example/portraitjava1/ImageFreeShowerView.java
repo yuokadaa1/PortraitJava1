@@ -45,8 +45,8 @@ public class ImageFreeShowerView extends View {
     private float mLastScaleFactor = 1.0f;
     // 拡大したり移動したりするときにつかう「画像を変形させるための変数」
     private Matrix bitmapMatrix = new Matrix();
-    // 切り替え時のバイブレーション
-    private Vibrator mVibrator;
+    // 切り替え時のバイブレーション -> しない
+//    private Vibrator mVibrator;
     // CanvasでつかうPaint変数
     private Paint mPaint = new Paint();
     // ピンチイン/アウト
@@ -143,8 +143,8 @@ public class ImageFreeShowerView extends View {
         // Gestureたちの設定
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
         mGestureDetector = new GestureDetector(context, mSimpleOnGestureListener);
-        // バイブレーションの初期化
-        mVibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
+        // バイブレーションの初期化 -> しない。
+//        mVibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
     }
 
     @Override
@@ -163,10 +163,19 @@ public class ImageFreeShowerView extends View {
             float scaleY = ((float) getHeight()) / mBitmapList.get(mBitmapPosition).getHeight();
             // 小さいほうを適応させる
             mLastScaleFactor = Math.min(scaleX, scaleY);
-            bitmapMatrix.postScale(mLastScaleFactor, mLastScaleFactor, 0, 0);
-            // バイブレーション
-            mVibrator.vibrate(200);
+            //画像を中心にするために、どっちが大きいか判定してpx,pyの位置を変更する。
+            float initPx = 0;
+            float initPy = 0;
+            if (Math.min(scaleX, scaleY) == scaleX){
+                initPy = -mBitmapList.get(mBitmapPosition).getHeight() / 2;
+            }else{
+                initPx = -mBitmapList.get(mBitmapPosition).getWidth() / 2;
+            }
+            bitmapMatrix.postScale(mLastScaleFactor, mLastScaleFactor, initPx, initPy);
+            // バイブレーション -> しない
+//            mVibrator.vibrate(200);
             isChangedFirstDraw = false;
+
         }
         //すべてのmatrixを適応
         canvas.save();
